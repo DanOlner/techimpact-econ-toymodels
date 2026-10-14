@@ -1,0 +1,20 @@
+{
+  "title": "AI, skills and jobs: building a two-sector model",
+  "intro": "A model of how efficiency-improving technology moves prices, pay and jobs, built step by step. Each stage below is kept as it was when completed, so earlier results stay available as the model grows.",
+  "stages": [
+    {
+      "id": "stage-1",
+      "title": "Stage 1: one sector, first test model",
+      "summary": "One sector plus “everything else”, with one and then four worker types; technology that augments or automates. Research’s tests 1–10 with expected values, charts of Bessen’s inverted U, augmenting and the hand-loom case, the two presets’ base years, and the first regime maps at three values of θ.",
+      "completed": "2026-10-14",
+      "frozen": true
+    },
+    {
+      "id": "stage-2",
+      "title": "Stage 2: two sectors and the supply chain",
+      "summary": "The second sector, the two-way supply chain between manufacturing and design, and both presets solved.",
+      "completed": null,
+      "frozen": false
+    }
+  ]
+}

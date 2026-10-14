@@ -39,7 +39,7 @@ SHM=1g
 # agent sees the list as $PUBLISH_PORTS, and its server must listen on 0.0.0.0 inside.
 # Changing this needs ./container.sh stop, then start. check.py runs its own container with
 # PUBLISH_PORTS set empty, so the two don't compete for the same ports.
-PUBLISH_PORTS="${PUBLISH_PORTS-}"
+PUBLISH_PORTS="${PUBLISH_PORTS-8000 8001}"
 
 running() { [ "$(docker inspect -f '{{.State.Running}}' "$NAME" 2>/dev/null)" = "true" ]; }
 

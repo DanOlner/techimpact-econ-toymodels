@@ -1,0 +1,48 @@
+{
+  "id": "map3-premium-vs-matched-share",
+  "title": "Map 3: premium against matched share",
+  "description": "Test 7's setup with the sector at 10% of spending, so that cheaper goods matter to everyone's real income. Incumbents earn a premium r in the sector and are its whole base-year workforce; a share h of them are matched, and the technology doubles matched output (g = 1). General workers can't use it. Outcome: the change in real income of unmatched incumbents, the type most likely to lose, and of matched incumbents. Where does it stay positive?",
+  "x": {
+    "key": "r",
+    "label": "Incumbents’ premium r",
+    "min": 0.05,
+    "max": 1.5,
+    "n": 30,
+    "log": false
+  },
+  "y": {
+    "key": "h",
+    "label": "Share of incumbents matched, h",
+    "min": 0.05,
+    "max": 0.95,
+    "n": 31,
+    "log": false
+  },
+  "thetas": [
+    5,
+    20,
+    200
+  ],
+  "outcomes": [
+    {
+      "key": "evUnmatched",
+      "label": "Unmatched incumbents’ change in real income",
+      "unit": "% of base income"
+    },
+    {
+      "key": "evMatched",
+      "label": "Matched incumbents’ change in real income",
+      "unit": "% of base income"
+    },
+    {
+      "key": "price",
+      "label": "Price",
+      "unit": ""
+    }
+  ],
+  "solves": 2790,
+  "failed": 0,
+  "worstAccountingGap": 8.293805847219718e-13,
+  "seconds": 11.218,
+  "run": "2026-10-14T14:03:35.264Z"
+}

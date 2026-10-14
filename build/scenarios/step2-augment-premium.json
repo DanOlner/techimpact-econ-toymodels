@@ -1,0 +1,19 @@
+{
+  "id": "step2-augment-premium",
+  "title": "Test 7: augmenting with a premium",
+  "description": "Incumbents (r = 0.5, half of them matched) are the sector's whole base-year workforce, with equal attraction to the sector and X. General workers produce 1 in the sector and in X and can't use the technology; with no base-year share in the sector, it's out of their choice set (a default). Young curve, θ = 200. The gain g rises from 0 to 5.",
+  "setup": {
+    "kind": "oneSector",
+    "sector": { "curve": "young", "spendingShare": 0.001 },
+    "types": [
+      { "id": "inc-matched", "label": "Incumbents, matched", "N": "balance", "sectorOutput": 1.5, "matched": true, "incumbent": true, "base": { "attraction": { "sector": 1, "X": 1 } } },
+      { "id": "inc-unmatched", "label": "Incumbents, unmatched", "N": "balance", "sectorOutput": 1.5, "incumbent": true, "base": { "attraction": { "sector": 1, "X": 1 } } },
+      { "id": "gen-matched", "label": "General, matched", "N": "rest", "sectorOutput": 1, "matched": true, "base": { "sectorShare": 0 } },
+      { "id": "gen-unmatched", "label": "General, unmatched", "N": "rest", "sectorOutput": 1, "base": { "sectorShare": 0 } }
+    ]
+  },
+  "theta": 200,
+  "sigmaW": 4,
+  "technology": { "kind": "augment", "adopters": ["M"], "g": 0 },
+  "sweep": { "path": "technology.g", "values": [0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3, 3.5, 4, 4.5, 5] }
+}

@@ -1,0 +1,17 @@
+{
+  "id": "step2-augment-no-premium",
+  "title": "Test 6: augmenting with no premium",
+  "description": "Matched and unmatched workers each produce 1 in the sector and in X, with the same 0.1% base-year share in the sector. Matched people number η times the sector's base-year employment (0.1% of people), so N_matched = 0.001 η. Young curve, g = 1, θ = 200.",
+  "setup": {
+    "kind": "oneSector",
+    "sector": { "curve": "young", "spendingShare": 0.001 },
+    "types": [
+      { "id": "matched", "label": "Matched", "N": 0.001, "sectorOutput": 1, "matched": true, "base": { "sectorShare": 0.001 } },
+      { "id": "unmatched", "label": "Unmatched", "N": "rest", "sectorOutput": 1, "base": { "sectorShare": 0.001 } }
+    ]
+  },
+  "theta": 200,
+  "sigmaW": 4,
+  "technology": { "kind": "augment", "adopters": ["M"], "g": 1 },
+  "sweep": { "path": "setup.types.0.N", "values": [0.0001, 0.0002, 0.0003, 0.0004, 0.0005, 0.0006, 0.0008, 0.001, 0.0012, 0.0014, 0.00156, 0.0018, 0.002, 0.0025, 0.003] }
+}

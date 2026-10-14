@@ -1,0 +1,18 @@
+{
+  "id": "step2-four-types-theta5",
+  "title": "Step 2 base year at θ = 5: four types",
+  "description": "Incumbents (r = 0.5) and general workers, each split into matched and unmatched halves. At θ = 5, incumbents' attraction terms are set so that 90% start in the sector; general workers' share in the sector is set by the spending share. Young curve, 0.1% of spending. No technology: tests 1 and 10.",
+  "setup": {
+    "kind": "oneSector",
+    "sector": { "curve": "young", "spendingShare": 0.001 },
+    "types": [
+      { "id": "inc-matched", "label": "Incumbents, matched", "N": "balance", "sectorOutput": 1.5, "matched": true, "incumbent": true, "base": { "sectorShare": 0.9 } },
+      { "id": "inc-unmatched", "label": "Incumbents, unmatched", "N": "balance", "sectorOutput": 1.5, "incumbent": true, "base": { "sectorShare": 0.9 } },
+      { "id": "gen-matched", "label": "General, matched", "N": "rest", "sectorOutput": 1, "matched": true, "base": { "sectorShare": 0.0002 } },
+      { "id": "gen-unmatched", "label": "General, unmatched", "N": "rest", "sectorOutput": 1, "base": { "sectorShare": 0.0002 } }
+    ]
+  },
+  "theta": 5,
+  "sigmaW": 4,
+  "technology": { "kind": "none" }
+}

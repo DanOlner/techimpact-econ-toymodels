@@ -1,0 +1,14 @@
+{
+  "id": "preset-business-service",
+  "title": "Preset: business service",
+  "description": "M firms sell mainly to households and buy design from D firms. D sells mostly to M.",
+  "sectors": [
+    { "id": "M", "label": "Manufacturing", "curve": "young", "spendingShare": 0.2 },
+    { "id": "D", "label": "Design", "curve": "young", "spendingShare": 0.02 }
+  ],
+  "coef": { "D->M": 0.15, "M->D": 0.05 },
+  "premium": 0.5,
+  "incumbentShareOfHeadcount": 0.75,
+  "incumbentShareAtHome": 0.9,
+  "matchedSplit": 0.5
+}

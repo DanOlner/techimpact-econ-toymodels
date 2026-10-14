@@ -1,0 +1,43 @@
+{
+  "id": "map1-gain-vs-starting-point",
+  "title": "Map 1: size of gain against starting point on the demand curve",
+  "description": "One sector at 0.1% of spending, one worker type. The sector's productivity rises by a factor A. The starting point is how saturated demand is in the base year, on the curve shared by the young (10%) and mature (80%) starting points (σ ≈ 0.875). Outcome: change in sector employment. Expect Bessen's hump: employment rises for young sectors and modest gains, and falls for mature sectors or large gains.",
+  "x": {
+    "key": "A",
+    "label": "Productivity gain A (log scale)",
+    "min": 1.05,
+    "max": 10.000000000000002,
+    "n": 41,
+    "log": true
+  },
+  "y": {
+    "key": "S",
+    "label": "Base-year saturation (share of ceiling)",
+    "min": 0.05,
+    "max": 0.95,
+    "n": 37,
+    "log": false
+  },
+  "thetas": [
+    5,
+    20,
+    200
+  ],
+  "outcomes": [
+    {
+      "key": "emp",
+      "label": "Change in sector employment",
+      "unit": "%"
+    },
+    {
+      "key": "sat",
+      "label": "Demand as a share of the ceiling",
+      "unit": "%"
+    }
+  ],
+  "solves": 4551,
+  "failed": 0,
+  "worstAccountingGap": 7.914217027325226e-12,
+  "seconds": 4.639,
+  "run": "2026-10-14T14:03:15.407Z"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "step1-bessen",
+  "title": "Step 1: one sector, one worker type, Bessen's setting",
+  "description": "A small sector (0.1% of spending) on the young curve, θ = 200. Productivity A in the sector rises from 1 to 10. Tests 1 to 5 vary the curve, the sector's size, θ and the switches from here.",
+  "setup": {
+    "kind": "oneSector",
+    "sector": { "curve": "young", "spendingShare": 0.001 },
+    "types": [{ "id": "W", "label": "Workers", "N": "rest", "sectorOutput": 1, "base": { "sectorShare": 0.001 } }]
+  },
+  "theta": 200,
+  "sigmaW": 4,
+  "technology": { "kind": "productivity", "adopters": ["M"], "A": 1 },
+  "sweep": { "path": "technology.A", "values": [1, 1.25, 1.5, 1.75, 2, 2.5, 2.765, 3, 3.5, 4, 5, 6, 7, 8, 8.858, 10] }
+}

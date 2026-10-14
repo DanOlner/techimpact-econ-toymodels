@@ -1,0 +1,18 @@
+{
+  "id": "step2-handloom",
+  "title": "Test 8: automating, the hand-loom case",
+  "description": "Incumbents (r = 1) are the sector's whole base-year workforce, with equal attraction to the sector and X, and can't mind machines. General workers can't do the old technique; matched general workers can mind machines. Their attraction to the machine technique equals their attraction to X (a default). Young curve, θ = 200. Machine output per minder A_m rises from 1 to 10; the spec's case is A_m = 8/3.",
+  "setup": {
+    "kind": "oneSector",
+    "sector": { "curve": "young", "spendingShare": 0.001 },
+    "types": [
+      { "id": "inc", "label": "Incumbents", "N": "balance", "sectorOutput": 2, "incumbent": true, "mindsMachines": false, "base": { "attraction": { "sector": 1, "X": 1 } } },
+      { "id": "gen-matched", "label": "General, matched (minders)", "N": "rest", "sectorOutput": 0, "matched": true, "mindsMachines": true, "base": { "sectorShare": 0 } },
+      { "id": "gen-unmatched", "label": "General, unmatched", "N": "rest", "sectorOutput": 0, "base": { "sectorShare": 0 } }
+    ]
+  },
+  "theta": 200,
+  "sigmaW": 4,
+  "technology": { "kind": "automate", "adopters": ["M"], "Am": 2.6666666666666665 },
+  "sweep": { "path": "technology.Am", "values": [1, 1.5, 2, 2.5, 2.6666666666666665, 3, 3.5, 4, 5, 6, 7, 8, 9, 10] }
+}

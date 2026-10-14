@@ -1,0 +1,48 @@
+{
+  "id": "map2-gain-vs-matched-share",
+  "title": "Map 2: size of gain against matched share",
+  "description": "Test 6's setup: matched and unmatched workers produce 1 in the sector and in X; the young curve; the sector at 0.1% of spending. Matched workers' output rises by 1 + g. η is the number of matched people as a multiple of the sector's base-year employment. Outcomes: the price, matched workers' pay relative to X, and the regime. Hand-worked boundaries: matched workers are scarce while η (1 + g) ≤ 1, and plentiful once η (1 + g) > Q(1/(1 + g)). The regime is read from who works in the sector (explain.ts): scarce while unmatched workers still make at least 1% of its units, plentiful once matched workers earn within 5% of their X pay. Those are conventions for large θ: at low θ some unmatched workers always stay, so cells read as scarce even where the price has fallen.",
+  "x": {
+    "key": "g",
+    "label": "Gain g (matched output × (1 + g))",
+    "min": 0.05,
+    "max": 3,
+    "n": 41,
+    "log": false
+  },
+  "y": {
+    "key": "eta",
+    "label": "Matched people η",
+    "min": 0.1,
+    "max": 3,
+    "n": 39,
+    "log": false
+  },
+  "thetas": [
+    5,
+    20,
+    200
+  ],
+  "outcomes": [
+    {
+      "key": "price",
+      "label": "Price",
+      "unit": ""
+    },
+    {
+      "key": "premium",
+      "label": "Matched workers’ pay premium over X",
+      "unit": "%"
+    },
+    {
+      "key": "regime",
+      "label": "Regime",
+      "unit": ""
+    }
+  ],
+  "solves": 4797,
+  "failed": 0,
+  "worstAccountingGap": 6.4534365196096444e-12,
+  "seconds": 8.509,
+  "run": "2026-10-14T14:03:23.976Z"
+}

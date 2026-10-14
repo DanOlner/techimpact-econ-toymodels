@@ -19,3 +19,6 @@ __pycache__/
 node_modules/
 test-results/
 playwright-report/
+
+# Preview builds of the report (published builds go to docs/<stage>/)
+build-preview/
