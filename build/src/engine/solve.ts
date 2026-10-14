@@ -77,6 +77,13 @@ export function evaluate(econ: Economy, omega: number[], solver?: SolverInfo): S
     ...firmRequired.map((r, i) => Math.abs(r - (firmSupplied[i] as number)) / Math.max(r, firmSupplied[i] as number, 1e-300)),
   );
 
+  const supplyChain = Math.max(
+    ...sectorOutput.map((q, k) => {
+      const use = (finalDemand[k] as number) + sectorOutput.reduce((acc, ql, l) => acc + (econ.coef[k]?.[l] ?? 0) * ql, 0);
+      return Math.abs(q - use) / Math.max(q, 1e-300);
+    }),
+  );
+
   return {
     omega: omega.slice(),
     firmPrice,
@@ -91,7 +98,7 @@ export function evaluate(econ: Economy, omega: number[], solver?: SolverInfo): S
     sectorEmployment,
     saturation,
     types,
-    accounting: { spendingVsIncome, xBalance, shareSums, marketResidual },
+    accounting: { spendingVsIncome, xBalance, shareSums, marketResidual, supplyChain },
     solver: solver ?? { method: "evaluate", start: omega.slice(), iterations: 0, converged: false },
   };
 }
@@ -112,13 +119,13 @@ export interface SolveOptions {
 /**
  * Solve for the piece rates that clear every firm's market.
  * One firm: bisection on ln ω, bracketing outwards from the start by factors of 2.
- * Two or more firms come with spec step 3.
+ * Several firms: Newton's method on ln ω (newtonSolve).
  */
 export function solve(econ: Economy, opts: SolveOptions = {}): Solution {
   const nF = econ.firms.length;
-  const start = opts.start ?? new Array<number>(nF).fill(1);
+  if (nF > 1) return newtonSolve(econ, opts);
+  const start = opts.start ?? econ.base.omega.slice();
   const tol = opts.tol ?? 1e-13;
-  if (nF !== 1) throw new Error("Solving with more than one firm comes with spec step 3");
 
   const g = (t: number) => logExcess(econ, [Math.exp(t)], 0);
   const t0 = Math.log(start[0] as number);
@@ -153,4 +160,155 @@ export function solve(econ: Economy, opts: SolveOptions = {}): Solution {
   }
   const t = 0.5 * (lo + hi);
   return evaluate(econ, [Math.exp(t)], { method: "bisection on ln ω", start, iterations, bracket, converged: hi - lo <= tol * 1.0001 });
+}
+
+/** Log excess demand for every firm: ln(required) − ln(supplied). */
+function logExcessAll(econ: Economy, t: number[]): number[] {
+  const sol = evaluate(econ, t.map(Math.exp));
+  return sol.firmRequired.map((r, i) => Math.log(r) - Math.log(sol.firmSupplied[i] as number));
+}
+
+const maxAbs = (v: number[]) => Math.max(...v.map(Math.abs));
+
+/** Solve A x = b by Gaussian elimination with partial pivoting. */
+function linearSolve(A: number[][], b: number[]): number[] {
+  const n = b.length;
+  const m = A.map((row, i) => [...row, b[i] as number]);
+  for (let c = 0; c < n; c++) {
+    let p = c;
+    for (let r = c + 1; r < n; r++) if (Math.abs(m[r]![c]!) > Math.abs(m[p]![c]!)) p = r;
+    [m[c], m[p]] = [m[p]!, m[c]!];
+    for (let r = 0; r < n; r++) {
+      if (r === c) continue;
+      const f = m[r]![c]! / m[c]![c]!;
+      for (let j = c; j <= n; j++) m[r]![j] = m[r]![j]! - f * m[c]![j]!;
+    }
+  }
+  return m.map((row, i) => row[n]! / row[i]!);
+}
+
+/** The economy at a different θ, with attraction terms re-set so the base year is still an equilibrium. */
+export function atTheta(econ: Economy, theta: number): Economy {
+  if (theta === econ.theta) return econ;
+  const shift = econ.theta - theta;
+  return {
+    ...econ,
+    theta,
+    switches: { ...econ.switches, strictSorting: false },
+    types: econ.types.map((t) => ({
+      ...t,
+      logAttr: t.logAttr.map((a, j) => {
+        const lp = t.baseLogPay?.[j];
+        return Number.isFinite(a) && lp !== undefined && Number.isFinite(lp) ? a + shift * lp : a;
+      }),
+    })),
+  };
+}
+
+interface NewtonResult {
+  t: number[];
+  converged: boolean;
+  iterations: number;
+}
+
+/**
+ * Newton's method on t = ln ω, with a forward-difference Jacobian and a backtracking line search
+ * on the largest log excess demand. Stops when every firm's log excess demand is below tol, or when
+ * a step makes no progress.
+ */
+function newton(econ: Economy, t0: number[], tol: number, farThreshold = 0.3, maxIter = 300): NewtonResult {
+  const n = t0.length;
+  let t = t0.slice();
+  let F = logExcessAll(econ, t);
+  let norm = maxAbs(F);
+  let iterations = 0;
+  let fallback = 0;
+  const stepSize = t0.map(() => 0.25);
+  const lastSign = t0.map(() => 0);
+  let converged = norm < tol;
+  for (; iterations < maxIter && !converged; iterations++) {
+    const h = 1e-7;
+    const J = Array.from({ length: n }, () => new Array<number>(n).fill(0));
+    for (let j = 0; j < n && norm <= farThreshold; j++) {
+      const tj = t.slice();
+      tj[j] = (tj[j] as number) + h;
+      const Fj = logExcessAll(econ, tj);
+      for (let i = 0; i < n; i++) J[i]![j] = ((Fj[i] as number) - (F[i] as number)) / h;
+    }
+    let step = linearSolve(J, F.map((v) => -v));
+    let next = t;
+    let Fn = F;
+    let progress = false;
+    // Far from the solution (any market off by more than farThreshold in logs), don't trust Newton:
+    // there the surface can slope the wrong way and Newton can creep off towards infinite piece rates.
+    if (norm <= farThreshold && step.every((v) => Number.isFinite(v))) {
+      // Cap the step so a bad Jacobian far from the solution can't throw ω out by many orders.
+      const big = maxAbs(step);
+      if (big > 1) step = step.map((v) => v / big);
+      let lambda = 1;
+      next = t.map((v, i) => v + (step[i] as number));
+      Fn = logExcessAll(econ, next);
+      while (!(maxAbs(Fn) < (1 - 1e-4 * lambda) * norm) && lambda > 1e-6) {
+        lambda /= 2;
+        next = t.map((v, i) => v + lambda * (step[i] as number));
+        Fn = logExcessAll(econ, next);
+      }
+      progress = maxAbs(Fn) < norm;
+    }
+    if (!progress) {
+      // Far from the solution the excess-demand surface can be flat, or even slope the wrong way,
+      // because incomes rise with piece rates and demand partly keeps up. Then move each piece rate
+      // the way its own market points (up where there's excess demand), by at most half a log
+      // unit, and let Newton take over again.
+      // Step sizes adapt per piece rate: they grow while its market keeps pointing the same way and
+      // halve when it flips, which homes in like bisection.
+      if (++fallback > 250) break;
+      for (let i = 0; i < n; i++) {
+        const sgn = Math.sign(F[i] as number);
+        if (lastSign[i] !== 0 && sgn !== lastSign[i]) stepSize[i] = (stepSize[i] as number) * 0.5;
+        else stepSize[i] = Math.min(1, (stepSize[i] as number) * 1.2);
+        lastSign[i] = sgn;
+      }
+      next = t.map((v, i) => v + Math.sign(F[i] as number) * (stepSize[i] as number));
+      Fn = logExcessAll(econ, next);
+      if (Fn.some((v) => !Number.isFinite(v))) break;
+    }
+    t = next;
+    F = Fn;
+    norm = maxAbs(F);
+    converged = norm < tol;
+  }
+  return { t, converged, iterations };
+}
+
+/**
+ * Several firms. Newton from the start (the base year's piece rates unless told otherwise). If
+ * that fails, which happens far from the solution at large θ where the logit saturates and the
+ * Jacobian is nearly flat, solve by continuation in θ: from θ = 2, where the landscape is smooth,
+ * up to the economy's θ in geometric steps, each starting from the last solution.
+ */
+export function newtonSolve(econ: Economy, opts: SolveOptions = {}): Solution {
+  const start = opts.start ?? econ.base.omega.slice();
+  const tol = opts.tol ?? 1e-12;
+  const theta = econ.switches.strictSorting ? STRICT_THETA : econ.theta;
+  const target = econ.switches.strictSorting ? atTheta({ ...econ, switches: { ...econ.switches, strictSorting: false } }, theta) : econ;
+  const first = newton(target, start.map(Math.log), tol);
+  if (first.converged) return evaluate(econ, first.t.map(Math.exp), { method: "Newton on ln ω", start, iterations: first.iterations, converged: true });
+
+  const thetaLow = Math.min(2, theta);
+  const steps = Math.max(1, Math.ceil(Math.log(theta / thetaLow) / Math.log(1.5)));
+  let t = start.map(Math.log);
+  let iterations = first.iterations;
+  let converged = false;
+  for (let k = 0; k <= steps; k++) {
+    const th = thetaLow * (theta / thetaLow) ** (k / steps);
+    // The first step may start far away; later ones start from a nearby solution, where Newton is
+    // trusted however large the residual (the next θ can make the market look steep).
+    const res = newton(atTheta(target, th), t, k === steps ? tol : 1e-9, k === 0 ? 0.3 : Infinity);
+    iterations += res.iterations;
+    t = res.t;
+    converged = res.converged;
+    if (!converged) break;
+  }
+  return evaluate(econ, t.map(Math.exp), { method: `Newton on ln ω, by continuation in θ (${steps + 1} steps)`, start, iterations, converged });
 }

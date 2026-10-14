@@ -132,3 +132,18 @@ table.num td, table.num th { font-variant-numeric: tabular-nums; }
 .map { margin: 12px 0; background: #fcfcfb; border: 1px solid var(--border); border-radius: 8px; padding: 8px; overflow-x: auto; }
 .map img { display: block; max-width: 100%; height: auto; }
 .crumb { margin: 0 0 8px; font-size: 13px; }
+/* Ledger bars. */
+.gridv { stroke: var(--grid); stroke-width: 1; }
+.seg.s1 { fill: var(--series-1); }
+.seg.s2 { fill: var(--series-2); }
+.bar-row:focus { outline: none; }
+.bar-row:hover .seg, .bar-row:focus .seg { opacity: 0.85; }
+.row-label { fill: var(--text-secondary); font-size: 12px; }
+.bar-total { fill: var(--text-primary); font-size: 12px; font-variant-numeric: tabular-nums; }
+.key.rect { width: 12px; height: 12px; border-radius: 2px; }
+.key.rect.s1 { background: var(--series-1); }
+.key.rect.s2 { background: var(--series-2); }
+.key.line:not(.s1):not(.s2):not(.s3) { background: var(--text-primary); }
+.chart-grid.four { grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); }
+ul.findings { max-width: 85ch; color: var(--text-secondary); padding-left: 20px; }
+ul.findings li { margin: 6px 0; }

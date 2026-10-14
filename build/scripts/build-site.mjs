@@ -25,6 +25,7 @@ if (!landingOnly) {
   if (stage.frozen && existsSync(join(out, "index.html")) && !force) {
     throw new Error(`${stage.id} is frozen and already published; pass --force to rebuild it`);
   }
+  if (stage.generate) execFileSync("npx", ["tsx", stage.generate], { cwd: root, stdio: "inherit" });
   execFileSync("npx", ["vite", "build", "--outDir", out, "--emptyOutDir"], { cwd: root, stdio: "inherit", env: { ...process.env, SITE_STAGE: stage.id, SITE_STAGE_TITLE: stage.title } });
   console.log(`Built ${stage.id} into docs/${stage.id}/`);
 }

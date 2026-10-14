@@ -30,7 +30,7 @@ export class CheckContext {
   checks: Check[] = [];
   solves = 0;
   /** Worst accounting gaps across every solve made through this context. */
-  worst: Accounting = { spendingVsIncome: 0, xBalance: 0, shareSums: 0, marketResidual: 0 };
+  worst: Accounting = { spendingVsIncome: 0, xBalance: 0, shareSums: 0, marketResidual: 0, supplyChain: 0 };
   unconverged = 0;
 
   run(scenario: Scenario, opts: SolveOptions = {}): Run {

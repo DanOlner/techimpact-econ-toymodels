@@ -86,6 +86,31 @@ The three one-sector maps were run at θ = 5, 20 and 200. They're in the report,
 
 These make question 2 (a plausible range for θ) more pressing. Conclusions about who gains from augmenting technology depend heavily on it.
 
+## Stage 2: two sectors, both presets solved (14 October 2026)
+
+Spec steps 3 to 5 are built: both presets with two firms per sector and six worker types. Tests 11 to 13 pass, with the solved headcounts matching the check values. The full results are in the build log and on the stage 2 page.
+
+### Defaults chosen for stage 2, to confirm
+
+1. **Both presets use the young curve for both sectors.** The spec gives curves "by scenario" but no default for the presets. Mature curves are a one-line change per scenario.
+2. **Incumbents and machine techniques.** Incumbents can mind machines only in their home sector's firms, if they can mind machines at all. This is our reading of recipe step 7: "Incumbents choose between their home sector's firms and X".
+3. **Who can mind machines** is a scenario switch (`machineMinders`): matched general workers (the spec's default), all matched workers, or everyone (pure deskilling).
+4. **Regime labels** aren't defined with several firms yet. The step 2 reading was for one adopting firm.
+
+### Findings that bear on the plan
+
+- **Upstream bottlenecks at low θ.** When people move reluctantly, a technology in one sector raises the other sector's price as it expands. Design's price rises 21% under automation in manufacturing in the business-service preset at θ = 5. In the brand preset with a large AI gain, this turns matched design incumbents from winners (+7% at θ = 200) into losers (−17.5% at θ = 5).
+- **Jobs move along the supply chain.**
+  - Automating manufacturing more than doubles design employment in the business-service preset.
+  - AI in the brand's design adds 44% to manufacturing employment while design jobs fall.
+  - This is the plan's "Gains for customer industries" pattern in reverse: here suppliers gain from their customers' productivity.
+- **The six-type pool.** Matched general workers are a large pool in both presets (about 43% of people). So augmenting technology is in the "plentiful" regime almost at once, and the scarce regime of test 6 barely appears. The plan's story, in which matched people stay scarce and earn a premium, needs a smaller matched share among general workers. That's a scenario setting (`matchedSplit`), now 0.5 for every type.
+- **Design upstream.** The Hicks–Marshall reasoning holds once two things are counted: design's own sales to households, and the price pass-through. The pass-through is only 0.4 in the brand preset, because design's labour is 40% of its price. Design employment falls with a design productivity gain in both presets. As the plan says, whether design jobs can grow depends on σ_DM, which isn't built yet.
+
+### Solver
+
+Far from the solution, the excess-demand surface for several firms is flat or slopes the wrong way at large θ, so Newton alone fails. The solver adds market-direction steps and continuation in θ, and converges from piece rates 0.01 to 100 times the base year (test 15). This answers the plan's "the solver may struggle" (point 6). The PhD's lesson that starting values decide convergence (E1) applied here too, and continuation in θ was the fix.
+
 ## Defaults chosen where the spec is silent
 
 1. **Test 7: general workers and the sector.** They produce 1 in the sector, but with no base-year share there, a zero attraction term takes the sector out of their choice set. It doesn't bite in test 7, because the piece rate only falls.

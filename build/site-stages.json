@@ -12,9 +12,10 @@
     {
       "id": "stage-2",
       "title": "Stage 2: two sectors and the supply chain",
-      "summary": "The second sector, the two-way supply chain between manufacturing and design, and both presets solved.",
+      "summary": "Two sectors, manufacturing and design, buying from each other; two firms in each sector; six worker types. Both presets solved, with AI in design, automation in manufacturing and one firm adopting alone; who gains through pay and through prices; and checks of the supply chain, the new solver and the six types.",
       "completed": null,
-      "frozen": false
+      "frozen": false,
+      "generate": "src/report/stage2/generate.ts"
     }
   ]
 }

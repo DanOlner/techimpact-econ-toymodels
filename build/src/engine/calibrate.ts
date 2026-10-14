@@ -1,9 +1,10 @@
 // Base years. Spec "The base year".
 // Steps 1 and 2: one sector, one firm, X. All prices and piece rates are 1 in the base year.
 
-import { curveMu, curveShape, household, utility, type Curve } from "./demand";
+import { curveMu, curveShape, household, type Curve } from "./demand";
+import { recordBase } from "./base-year";
+import { buildPresetEconomy } from "./preset-economy";
 import { backOutLogAttr, logitShares, payByJob } from "./labour";
-import { evaluate } from "./solve";
 import { CURVES, type Economy, type Job, type OneSectorSetup, type Scenario, type WorkerType } from "./types";
 
 /** Index of each job in a one-sector economy. */
@@ -11,7 +12,8 @@ export const JOB = { X: 0, old: 1, machine: 2 } as const;
 
 /** Build the calibrated base-year economy for a scenario, with its switches set. */
 export function buildBaseEconomy(scenario: Scenario): Economy {
-  const econ = buildOneSector(scenario.setup, scenario.theta, scenario.sigmaW);
+  const setup = scenario.setup;
+  const econ = setup.kind === "preset" ? buildPresetEconomy(setup, scenario.theta, scenario.sigmaW) : buildOneSector(setup, scenario.theta, scenario.sigmaW);
   econ.switches = { ...(scenario.switches ?? {}) };
   return econ;
 }
@@ -126,18 +128,5 @@ function buildOneSector(setup: OneSectorSetup, theta: number, sigmaW: number): E
   };
 
   // Record the base year, and check that it clears at a piece rate of 1.
-  const sol = evaluate(econ, omega0);
-  if (sol.accounting.marketResidual > 1e-10) throw new Error(`Base year doesn't clear: residual ${sol.accounting.marketResidual}`);
-  const curves: Curve[] = [{ gamma, mu, sigma }];
-  econ.base = {
-    omega: omega0,
-    x: sol.types.map((o) => o.x),
-    y: sol.types.map((o) => o.y),
-    demand: sol.types.map((o) => o.demand),
-    finalDemand: sol.finalDemand,
-    sectorPrice: sol.sectorPrice,
-    utility: sol.types.map((o) => utility(curves, sol.sectorPrice, o.x)),
-    shares: sol.types.map((o) => o.shares),
-  };
-  return econ;
+  return recordBase(econ, omega0);
 }

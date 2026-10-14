@@ -2,7 +2,7 @@
 
 import type { Run } from "../engine/sweep";
 import { linspace, withValue } from "../engine/sweep";
-import type { Scenario } from "../engine/types";
+import type { OneSectorSetup, Scenario } from "../engine/types";
 import { JOB } from "../engine/calibrate";
 import { CheckContext, IDENTITY, LEVEL, PP } from "./context";
 import step1 from "../../scenarios/step1-bessen.json";
@@ -44,7 +44,7 @@ export function step1At(curve: "young" | "mature", A: number, opts: { share?: nu
 
 /** Test 6 scenario at η (matched people as a multiple of base-year sector employment). */
 export function noPremiumAt(eta: number, theta?: number): Scenario {
-  const L0 = SCENARIOS.noPremium.setup.sector.spendingShare; // income per head is 1, so L₀ = the spending share
+  const L0 = (SCENARIOS.noPremium.setup as OneSectorSetup).sector.spendingShare; // income per head is 1, so L₀ = the spending share
   let sc = withValue(SCENARIOS.noPremium, "setup.types.0.N", eta * L0);
   if (theta !== undefined) sc = withValue(sc, "theta", theta);
   return sc;
@@ -200,7 +200,7 @@ function test4and5(ctx: CheckContext) {
 
 function test6(ctx: CheckContext) {
   const T = "6 Augmenting, no premium";
-  const L0 = SCENARIOS.noPremium.setup.sector.spendingShare;
+  const L0 = (SCENARIOS.noPremium.setup as OneSectorSetup).sector.spendingShare;
   const cases = [
     { eta: 0.4, price: 1, pay: 2, emp: -0.4 },
     { eta: 1, price: 0.68, pay: 1.36, emp: 0 },

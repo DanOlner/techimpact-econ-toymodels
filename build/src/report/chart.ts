@@ -270,3 +270,137 @@ export function simpleTable(header: string[], rows: string[][]): HTMLTableElemen
   }
   return t;
 }
+
+export interface LedgerRow {
+  label: string;
+  /** Pay part and price part, in the chart's unit; they can have different signs. */
+  pay: number;
+  price: number;
+}
+
+/**
+ * The gains ledger as horizontal diverging stacked bars: one bar per worker type, split into its
+ * pay part (slot 1) and price part (slot 2), losses to the left of zero and gains to the right.
+ * The total is labelled at the bar's end.
+ */
+export function ledgerChart(spec: { title: string; subtitle?: string; rows: LedgerRow[]; unit: string; domain?: [number, number] }): HTMLElement {
+  const fig = document.createElement("figure");
+  fig.className = "chart";
+  const cap = document.createElement("figcaption");
+  const t = document.createElement("h4");
+  t.textContent = spec.title;
+  cap.appendChild(t);
+  if (spec.subtitle) {
+    const p = document.createElement("p");
+    p.className = "subtitle";
+    p.textContent = spec.subtitle;
+    cap.appendChild(p);
+  }
+  fig.appendChild(cap);
+  const legend = document.createElement("ul");
+  legend.className = "legend";
+  for (const [cls, text] of [["rect s1", "Pay part (as earners)"], ["rect s2", "Price part (as consumers)"]] as const) {
+    const li = document.createElement("li");
+    const k = document.createElement("span");
+    k.className = `key ${cls}`;
+    li.append(k, document.createTextNode(text));
+    legend.appendChild(li);
+  }
+  fig.appendChild(legend);
+
+  const W = 420;
+  const rowH = 30;
+  const M = { top: 22, right: 64, bottom: 30, left: 150 };
+  const H = M.top + spec.rows.length * rowH + M.bottom;
+  const neg = spec.rows.map((r) => Math.min(0, r.pay) + Math.min(0, r.price));
+  const pos = spec.rows.map((r) => Math.max(0, r.pay) + Math.max(0, r.price));
+  let [d0, d1] = spec.domain ?? [Math.min(0, ...neg), Math.max(0, ...pos)];
+  const ticks = niceTicks(d0, d1, 5);
+  const step = (ticks[1] ?? 1) - (ticks[0] ?? 0);
+  d0 = Math.min(d0, Math.floor(d0 / step) * step);
+  d1 = Math.max(d1, Math.ceil(d1 / step) * step);
+  const sx = (v: number) => M.left + ((v - d0) / (d1 - d0)) * (W - M.left - M.right);
+
+  const wrap = document.createElement("div");
+  wrap.className = "plot";
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `${spec.title}. Values are in the table below.` });
+  wrap.appendChild(svg);
+  for (const tk of niceTicks(d0, d1, 5)) {
+    el("line", { x1: sx(tk), x2: sx(tk), y1: M.top, y2: H - M.bottom, class: tk === 0 ? "axis" : "gridv" }, svg);
+    const lab = el("text", { x: sx(tk), y: H - M.bottom + 16, "text-anchor": "middle", class: "tick" }, svg);
+    lab.textContent = defaultFormat(tk);
+  }
+  const totalHead = el("text", { x: W - 4, y: M.top - 8, "text-anchor": "end", class: "tick" }, svg);
+  totalHead.textContent = "Total";
+  const unitLab = el("text", { x: (M.left + W - M.right) / 2, y: H - 2, "text-anchor": "middle", class: "axis-label" }, svg);
+  unitLab.textContent = spec.unit;
+
+  const tip = document.createElement("div");
+  tip.className = "tooltip";
+  tip.hidden = true;
+  wrap.appendChild(tip);
+  const barH = 18;
+  spec.rows.forEach((r, i) => {
+    const yc = M.top + i * rowH + rowH / 2;
+    const g = el("g", { class: "bar-row", tabindex: 0 }, svg);
+    const name = el("text", { x: M.left - 8, y: yc + 4, "text-anchor": "end", class: "row-label" }, g);
+    name.textContent = r.label;
+    // Stack: positive parts rightwards from 0, negative parts leftwards, pay first.
+    let right = 0;
+    let left = 0;
+    for (const [v, slot] of [[r.pay, 1], [r.price, 2]] as const) {
+      if (v === 0) continue;
+      const a = v > 0 ? right : left + v;
+      const b = v > 0 ? right + v : left;
+      if (v > 0) right += v;
+      else left += v;
+      const x0 = sx(a);
+      const x1 = sx(b);
+      // 2px surface gap between touching segments.
+      const gap = 1;
+      el("rect", { x: x0 + gap, y: yc - barH / 2, width: Math.max(0, x1 - x0 - 2 * gap), height: barH, rx: 2, class: `seg s${slot}` }, g);
+    }
+    // Totals in their own column on the right, so they never collide with labels or bars.
+    const total = r.pay + r.price;
+    const lab = el("text", { x: W - 4, y: yc + 4, "text-anchor": "end", class: "bar-total" }, g);
+    lab.textContent = `${total > 0 ? "+" : ""}${defaultFormat(total)}`;
+    el("rect", { x: 0, y: yc - rowH / 2, width: W, height: rowH, fill: "transparent" }, g);
+    const show = () => {
+      tip.replaceChildren();
+      const head = document.createElement("div");
+      head.className = "tip-head";
+      head.textContent = r.label;
+      tip.appendChild(head);
+      for (const [v, slot, nm] of [[total, 0, "Total"], [r.pay, 1, "Pay part"], [r.price, 2, "Price part"]] as const) {
+        const row = document.createElement("div");
+        row.className = "tip-row";
+        const key = document.createElement("span");
+        key.className = slot ? `key line s${slot}` : "key line";
+        const val = document.createElement("strong");
+        val.textContent = `${v > 0 ? "+" : ""}${defaultFormat(v)}`;
+        const n = document.createElement("span");
+        n.textContent = nm;
+        row.append(key, val, n);
+        tip.appendChild(row);
+      }
+      tip.hidden = false;
+      tip.style.left = "";
+      tip.style.right = "8px";
+      tip.style.top = `${((yc + rowH / 2) / H) * 100}%`;
+    };
+    g.addEventListener("pointerenter", show);
+    g.addEventListener("focus", show);
+    g.addEventListener("pointerleave", () => (tip.hidden = true));
+    g.addEventListener("blur", () => (tip.hidden = true));
+  });
+  fig.appendChild(wrap);
+
+  const det = document.createElement("details");
+  det.className = "table-view";
+  const sum = document.createElement("summary");
+  sum.textContent = "Table view";
+  det.appendChild(sum);
+  det.appendChild(simpleTable(["Type", `Total (${spec.unit})`, "Pay part", "Price part"], spec.rows.map((r) => [r.label, defaultFormat(r.pay + r.price), defaultFormat(r.pay), defaultFormat(r.price)])));
+  fig.appendChild(det);
+  return fig;
+}

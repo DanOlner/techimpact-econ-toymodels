@@ -71,7 +71,23 @@ export interface OneSectorSetup {
   types: TypeSetup[];
 }
 
-export type Setup = OneSectorSetup;
+/**
+ * Spec steps 3 to 5: a preset's sectors, built by research's recipe (presets.ts), with any number of
+ * firms per sector and 2n + 2 worker types: each sector's incumbents and the general workers, each
+ * split into matched and unmatched halves.
+ */
+export interface PresetSetup {
+  kind: "preset";
+  /** The preset data (scenarios/preset-*.json). */
+  preset: import("./presets").PresetSpec;
+  firmsPerSector: number;
+  /** Override sectors' demand curves by sector id; default is the preset's. */
+  curves?: Record<string, "young" | "mature" | CurveSpec>;
+  /** Who can mind machines. Default "matched-general", the spec's default; "all" is pure deskilling. */
+  machineMinders?: "matched-general" | "matched" | "all";
+}
+
+export type Setup = OneSectorSetup | PresetSetup;
 
 export interface Sweep {
   /** Dotted path of the scenario field to vary, such as "technology.A" or "setup.types.0.N". */
@@ -126,6 +142,12 @@ export interface WorkerType {
   output: number[];
   /** log b_{s,j} per job; −Infinity removes the job from the choice set. */
   logAttr: number[];
+  /**
+   * ln of base-year pay in each job (a machine job takes its firm's old-technique pay). Used to
+   * re-set attraction terms when solving by continuation in θ, so that the base year stays an
+   * equilibrium at every intermediate θ.
+   */
+  baseLogPay?: number[];
 }
 
 export interface BaseYear {
@@ -182,6 +204,8 @@ export interface Accounting {
   shareSums: number;
   /** Max relative gap between units required of each firm and units its workers make. */
   marketResidual: number;
+  /** Max relative gap between each sector's output and its final plus intermediate use. */
+  supplyChain: number;
 }
 
 export interface SolverInfo {

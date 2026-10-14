@@ -24,7 +24,7 @@ export interface FirmExplanation {
   marginal: string[];
 }
 
-export type Regime = "not augmenting" | "scarce" | "in between" | "plentiful";
+export type Regime = "not augmenting" | "not defined" | "scarce" | "in between" | "plentiful";
 
 export interface Explanation {
   firms: FirmExplanation[];
@@ -57,7 +57,9 @@ export function explain(econ: Economy, sol: Solution, tech: Technology): Explana
     const marginal = econ.types.filter((_, s) => typeShareInFirm[s]! > 1e-3 && typeShareInFirm[s]! < 1 - 1e-3).map((t) => t.id);
     return { firm: firm.id, presence, marginal };
   });
-  return { firms, regime: tech.kind === "augment" ? augmentRegime(econ, sol) : "not augmenting" };
+  // The three-regime reading is for one firm (spec step 2); with several firms it isn't defined yet.
+  const regime: Regime = tech.kind !== "augment" ? "not augmenting" : econ.firms.length === 1 ? augmentRegime(econ, sol) : "not defined";
+  return { firms, regime };
 }
 
 function augmentRegime(econ: Economy, sol: Solution): Regime {

@@ -365,3 +365,56 @@ Newest entries go at the bottom. The **Results** subsections record what the mod
 - **Preview.** `npm run preview` serves all of `docs/` on port 8000 with Python's static server.
 - **Stage 1** (steps 1–2, presets' base years, maps 1–3) is published at `docs/stage-1/` and frozen.
 - **Stage 2** (two sectors and the supply chain) is listed as not yet published. It will build into `docs/stage-2/`.
+
+### 14 October 2026: stage 2, two sectors (spec steps 3 to 5)
+
+- **Scope.** Stage 2 covers spec steps 3, 4 and 5 together, because research's preset recipe needs all three: two sectors, two firms per sector, and six worker types (2n + 2 for n sectors). Still Stage A.
+- **Built.**
+  - **`src/engine/preset-economy.ts`** builds a preset's economy from the recipe, with any number of firms per sector. Incumbents choose between their home sector's firms and X; general workers choose among every firm and X. A machine technique's attraction equals the same firm's old technique.
+  - **`src/engine/base-year.ts`** holds the shared steps: joint calibration of every sector's γ to its spending share, and recording the base year. It also stores each type's base-year log pay, for continuation.
+  - **The solver for several firms** (`solve.ts`) works in three layers:
+    1. Newton on ln ω, with a numerical Jacobian and a backtracking line search, trusted only when every market is within 0.3 in logs.
+    2. Further out, adaptive "market-direction" steps: each piece rate moves the way its own market points, with a step that grows while the market keeps pointing the same way and halves when it flips.
+    3. If that fails, continuation in θ, from θ = 2 up to the target in steps of × 1.5. At each intermediate θ, attraction terms are re-set by (θ_target − θ) × ln(base-year pay), so the base year stays an equilibrium.
+  - **Why the layers were needed.** Newton alone failed from 20% above the base year at θ = 200. A 2% change in one piece rate moves general workers wholly into or out of a sector, so the surface is a narrow cliff with flat ground around it. Far above the solution, excess supply barely changes with the piece rates, because incomes rise with them and demand partly keeps up. The surface even slopes the wrong way there, so Newton crept off towards infinite piece rates.
+  - **A new accounting identity:** output equals final plus intermediate use.
+  - **The regime label** is "not defined" when there are several firms.
+- **Tests:** 222 in the suite.
+  - **Test 11 (prices through the chain):** with one firm per sector, prices equal ω · B to within 2 × 10⁻¹⁶, across 4 technologies and both θ.
+  - **Test 12 (identical firms split 50:50):** exact. Two identical firms also give the same economy as one firm, to within 10⁻¹⁴ (an aggregation check).
+  - **Test 13 (presets solved):** both presets solve back to the recipe's base year, from 20% above and below, with one and two firms per sector, at θ = 5 and 200. The solved headcounts match the spec's check values.
+  - **Test 14:** the six types' matched and unmatched halves are identical with no technology.
+  - **Test 15:** the solver converges from piece rates 0.01 to 100 times the base year, even and uneven, for 3 technologies, both presets and both θ: 144 cold starts, none failing. Every cold start reaches the same ω within 2 × 10⁻¹³ in logs.
+  - **Test 16:** Newton with continuation agrees with bisection on one-sector scenarios, to 3 × 10⁻¹⁴.
+  - **Test 17:** the accounting identities hold to about 5 × 10⁻¹² or better.
+- **Results** (two firms per sector, σ_w = 4, θ = 200 unless stated; real income as a share of base-year income).
+  - **Automation in manufacturing, business-service preset (A_m = 3).**
+    - The manufacturing price falls to 0.49.
+    - Manufacturing employment rises 44%, and **design employment rises 123%**: each unit of manufacturing uses 0.15 units of design, and manufacturing output roughly triples.
+    - Manufacturing incumbents lose 17.7% (they can't mind machines). Design incumbents gain 27%, mostly as consumers (23%). General workers gain about 20%.
+  - **Automation in manufacturing, brand preset (A_m = 3).** Manufacturing employment +6% and design +129%: the brand's price falls to 0.61, and demand for branded goods grows. Manufacturing incumbents lose 20.7%.
+  - **AI in design, business-service preset (g = 1).**
+    - The design price falls to 0.53, and manufacturing's to 0.93.
+    - Manufacturing employment +13.7%, design +2.1%.
+    - Unmatched design incumbents lose 28.9%; matched design incumbents gain 7.3%. Everyone else gains 3–5%, nearly all through prices.
+  - **AI in design, brand preset (g = 1).**
+    - The brand's price can only fall to 0.80, because 60% of its cost is manufacturing.
+    - **Manufacturing employment rises 43.9% while design falls 23.5%.** The gain in the downstream brand creates jobs in its supplier.
+    - Unmatched design incumbents lose 27.8%.
+  - **The six-type pool effect.** With six types, a small g already draws in matched general workers, who are a large pool. Design employment jumps at the first step of g (to +12% at g = 0.125 in the business-service preset, θ = 200), then falls as the gain grows. In the one-sector tests, matched workers were scarce or plentiful by construction; in the presets they're plentiful from the start.
+  - **θ = 5: the other sector becomes a bottleneck.** When people move reluctantly, the sector that has to expand raises its price:
+    - Design's price rises 21% under automation in manufacturing (business service, A_m = 3).
+    - Manufacturing's price rises 12% under AI in design (brand, g = 1), and 21% at g = 3.
+    - In the brand preset at g = 3, **even matched design incumbents lose 17.5%**, against a gain of 6.9% at θ = 200: the brand's price can't fall far, so design demand doesn't grow enough to absorb their gain.
+  - **One firm adopts** (productivity × A in M1 only). M1's share rises faster with σ_w. At A = 2 it reaches 75%, 90% and 99.5% for σ_w = 2, 4 and 10 in the business-service preset (79%, 94% and 99.9% in the brand preset). Manufacturing employment traces Bessen's hump in the business-service preset, and falls in the brand preset, where manufacturing sells mostly to design.
+  - **Design upstream (Hicks–Marshall).** For a 1% design productivity gain, design output rises:
+    - business service: 0.86 against an approximation of 0.93
+    - brand: 0.67 against 0.78
+
+    The approximation weights households' and manufacturers' demand by design's sales to each, and multiplies by the price pass-through. That pass-through is 0.96 in business service but only 0.40 in the brand preset, because design's labour is 40% of its price. **Design employment falls with a design productivity gain in both presets** (−0.18 and −0.40 per 1%). In the business-service preset, design is propped up by its 40% of sales to households; sold only to manufacturers, it would respond with about 0.28.
+- **Site.**
+  - Stage 2 is published at `docs/stage-2/` and isn't frozen yet.
+  - Its data is generated at build time (`src/report/stage2/generate.ts`, about 1,200 solves in 9 s) and embedded in the page.
+  - The report code is split into `common.ts`, `stage1.ts` and `stage2/page.ts`, chosen by the build's `SITE_STAGE`.
+  - Stage 1's map files are copied into stage 1's folder only.
+  - A new gains-ledger bar chart shows pay and price parts as diverging stacked bars, with totals in their own column.

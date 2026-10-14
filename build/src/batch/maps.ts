@@ -7,7 +7,7 @@ import { JOB } from "../engine/calibrate";
 import { curveShape } from "../engine/demand";
 import { normCdf, normInv, normPdf } from "../engine/normal";
 import { linspace, logspace, withValue, type Run } from "../engine/sweep";
-import { CURVES, type Scenario } from "../engine/types";
+import { CURVES, type OneSectorSetup, type Scenario } from "../engine/types";
 import { baseEmployment, empChange, noPremiumAt, SCENARIOS } from "../checks/spec-tests";
 
 export interface Axis {
@@ -162,8 +162,9 @@ function premiumScenario(r: number, h: number, theta: number): Scenario {
   sc = withValue(sc, "setup.sector.spendingShare", 0.1);
   sc = withValue(sc, "setup.types.0.sectorOutput", 1 + r);
   sc = withValue(sc, "setup.types.1.sectorOutput", 1 + r);
-  sc.setup.types[0]!.balanceWeight = h;
-  sc.setup.types[1]!.balanceWeight = 1 - h;
+  const setup = sc.setup as OneSectorSetup;
+  setup.types[0]!.balanceWeight = h;
+  setup.types[1]!.balanceWeight = 1 - h;
   return sc;
 }
 
