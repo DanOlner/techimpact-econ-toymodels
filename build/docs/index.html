@@ -6,10 +6,21 @@
 @media (prefers-color-scheme:dark){:root{color-scheme:dark;--page:#0d0d0d;--surface:#1a1a19;--ink:#fff;--ink2:#c3c2b7;--border:rgba(255,255,255,.1);--link:#3987e5}}
 body{margin:0;background:var(--page);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
 main{max-width:860px;margin:0 auto;padding:32px 24px 64px}h1{font-size:28px;margin:0 0 8px}p{color:var(--ink2);max-width:75ch}
-ol{list-style:none;padding:0;margin:24px 0 0;display:grid;gap:12px}li{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 20px}
-h2{font-size:18px;margin:4px 0}a{color:var(--link)}.status{color:var(--muted);font-size:13px;margin:0}
+ol{list-style:none;padding:0;margin:24px 0 0;display:grid;gap:12px}ol li{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 20px}
+h2{font-size:18px;margin:4px 0}.about h2,.stages-head{font-size:20px;margin:28px 0 8px}.links{color:var(--ink2);padding-left:20px}.links li{margin:4px 0}a{color:var(--link)}.status{color:var(--muted);font-size:13px;margin:0}
 </style></head>
 <body><main><h1>AI, skills and jobs: building a two-sector model</h1><p>A model of how efficiency-improving technology moves prices, pay and jobs, built step by step. Each stage below is kept as it was when completed, so earlier results stay available as the model grows.</p>
+<section class="about">
+<h2>What this is</h2>
+<p>These are toy models of how efficiency-improving technology, such as AI or automation, moves prices, pay and jobs. They ask two questions. When does a technology create more jobs than it destroys? Bessen’s answer depends on where demand sits on its curve. And who gains and who loses? Schneider and Vipond’s history shows that the answer depends on who can use the new technology, and on where everyone else can go.</p>
+<p>The plan is to build up from the simplest case one step at a time, checking each step against results worked out by hand. It starts with one sector plus “everything else”, then adds a second sector and the supply chain between them. Later steps add frictions and unemployment, people moving in and out, and larger networks of industries and places. The models are abstract for now, made to understand mechanisms rather than to forecast.</p>
+<p>Claude Code wrote the model, its tests and these pages, working from design notes written in separate research sessions with Claude. It ran the tests and parameter sweeps, and reported where results didn’t match expectations. Decisions about the design were made with the human author, who reviews and commits all the work.</p>
+<ul class="links">
+<li><a href="https://github.com/DanOlner/techimpact-econ-toymodels">The repository</a>: code, research notes and build plans.</li>
+<li><a href="https://github.com/DanOlner/techimpact-econ-toymodels/tree/master/llm_convos">LLM conversations</a>: the conversations behind the build, exported safely using a tweaked version of <a href="https://github.com/DanOlner/export_all_convos">export_all_convos</a>.</li>
+</ul>
+</section>
+<h2 class="stages-head">Stages of the build</h2>
 <ol>
 <li><h2><a href="stage-1/">Stage 1: one sector, first test model</a></h2><p class="status">Completed 2026-10-14</p><p>One sector plus “everything else”, with one and then four worker types; technology that augments or automates. Research’s tests 1–10 with expected values, charts of Bessen’s inverted U, augmenting and the hand-loom case, the two presets’ base years, and the first regime maps at three values of θ.</p></li>
 <li><h2><a href="stage-2/">Stage 2: two sectors and the supply chain</a></h2><p class="status">In progress: this page is updated as the stage is built</p><p>Two sectors, manufacturing and design, buying from each other; two firms in each sector; six worker types. Both presets solved, with AI in design, automation in manufacturing and one firm adopting alone; who gains through pay and through prices; and checks of the supply chain, the new solver and the six types.</p></li>

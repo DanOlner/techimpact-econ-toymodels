@@ -17,5 +17,24 @@
       "frozen": false,
       "generate": "src/report/stage2/generate.ts"
     }
+  ],
+  "about": [
+    "These are toy models of how efficiency-improving technology, such as AI or automation, moves prices, pay and jobs. They ask two questions. When does a technology create more jobs than it destroys? Bessen’s answer depends on where demand sits on its curve. And who gains and who loses? Schneider and Vipond’s history shows that the answer depends on who can use the new technology, and on where everyone else can go.",
+    "The plan is to build up from the simplest case one step at a time, checking each step against results worked out by hand. It starts with one sector plus “everything else”, then adds a second sector and the supply chain between them. Later steps add frictions and unemployment, people moving in and out, and larger networks of industries and places. The models are abstract for now, made to understand mechanisms rather than to forecast.",
+    "Claude Code wrote the model, its tests and these pages, working from design notes written in separate research sessions with Claude. It ran the tests and parameter sweeps, and reported where results didn’t match expectations. Decisions about the design were made with the human author, who reviews and commits all the work."
+  ],
+  "links": [
+    {
+      "label": "The repository",
+      "url": "https://github.com/DanOlner/techimpact-econ-toymodels",
+      "note": "code, research notes and build plans"
+    },
+    {
+      "label": "LLM conversations",
+      "url": "https://github.com/DanOlner/techimpact-econ-toymodels/tree/master/llm_convos",
+      "note": "the conversations behind the build, exported safely using a tweaked version of",
+      "extraLabel": "export_all_convos",
+      "extraUrl": "https://github.com/DanOlner/export_all_convos"
+    }
   ]
 }

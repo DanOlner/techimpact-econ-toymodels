@@ -418,3 +418,13 @@ Newest entries go at the bottom. The **Results** subsections record what the mod
   - The report code is split into `common.ts`, `stage1.ts` and `stage2/page.ts`, chosen by the build's `SITE_STAGE`.
   - Stage 1's map files are copied into stage 1's folder only.
   - A new gains-ledger bar chart shows pay and price parts as diverging stacked bars, with totals in their own column.
+
+### 15 October 2026: landing page text
+
+- **Added** a "What this is" section to the landing page (`docs/index.html`), with three paragraphs:
+  - what the models are for
+  - the step-by-step build plan
+  - Claude Code's role
+- **Links** to the repository and to the exported LLM conversations, which credit the export tool.
+- **The text lives in `site-stages.json`** (`about`, `links`), so it can be edited without touching the build script.
+- Only the landing page was rewritten (`--landing-only`); no stage page was rebuilt.

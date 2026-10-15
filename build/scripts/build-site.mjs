@@ -51,10 +51,18 @@ writeFileSync(
 @media (prefers-color-scheme:dark){:root{color-scheme:dark;--page:#0d0d0d;--surface:#1a1a19;--ink:#fff;--ink2:#c3c2b7;--border:rgba(255,255,255,.1);--link:#3987e5}}
 body{margin:0;background:var(--page);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
 main{max-width:860px;margin:0 auto;padding:32px 24px 64px}h1{font-size:28px;margin:0 0 8px}p{color:var(--ink2);max-width:75ch}
-ol{list-style:none;padding:0;margin:24px 0 0;display:grid;gap:12px}li{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 20px}
-h2{font-size:18px;margin:4px 0}a{color:var(--link)}.status{color:var(--muted);font-size:13px;margin:0}
+ol{list-style:none;padding:0;margin:24px 0 0;display:grid;gap:12px}ol li{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 20px}
+h2{font-size:18px;margin:4px 0}.about h2,.stages-head{font-size:20px;margin:28px 0 8px}.links{color:var(--ink2);padding-left:20px}.links li{margin:4px 0}a{color:var(--link)}.status{color:var(--muted);font-size:13px;margin:0}
 </style></head>
 <body><main><h1>${esc(site.title)}</h1><p>${esc(site.intro)}</p>
+<section class="about">
+<h2>What this is</h2>
+${(site.about ?? []).map((t) => `<p>${esc(t)}</p>`).join("\n")}
+<ul class="links">
+${(site.links ?? []).map((l) => `<li><a href="${esc(l.url)}">${esc(l.label)}</a>: ${esc(l.note)}${l.extraUrl ? ` <a href="${esc(l.extraUrl)}">${esc(l.extraLabel)}</a>` : ""}.</li>`).join("\n")}
+</ul>
+</section>
+<h2 class="stages-head">Stages of the build</h2>
 <ol>
 ${items}
 </ol></main></body></html>
